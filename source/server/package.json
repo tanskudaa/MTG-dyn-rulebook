@@ -1,0 +1,30 @@
+{
+  "name": "rulebook",
+  "version": "0.1.0",
+  "description": "Magic: The Gathering rulebook SPA",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --watch ./.. index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanskudaa/MTG-dyn-rulebook.git"
+  },
+  "author": "tanskudaa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tanskudaa/MTG-dyn-rulebook/issues"
+  },
+  "homepage": "https://github.com/tanskudaa/MTG-dyn-rulebook#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "rotating-file-stream": "^2.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
