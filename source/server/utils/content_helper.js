@@ -49,11 +49,10 @@ const parseRules = (plainDataObject) => {
   }
 
   // Split on newlines
-  const rulesSplit = plainDataObject.data
+  const plainTextSplit = plainDataObject.data
     .replace(/(?:\\[rn]|[\r\n]+)+/g, '\n')  // CR+LF, CR and LF safe newline parse
     .split('\n')
-
-  // console.log(rulesSplit.filter((key, index) => index < 10))
+    .filter(elem => elem.trim() !== '')     // Strip empty lines
 
   // Map onto array of rule numbers with indeces
   const indexingFunction = (elem, index) => {
@@ -65,13 +64,12 @@ const parseRules = (plainDataObject) => {
     const firstDigits = firstWord
       .split('.')[0]
 
-    if (!isNaN(firstDigits)) return { [firstWord]: index }
+    if (!isNaN(firstDigits)) return { ruleNumber: firstWord, index: index }
   }
-  const indeces = rulesSplit
+
+  const numberingIndexes = plainTextSplit
     .map(indexingFunction)
     .filter(elem => typeof elem !== 'undefined')
-
-  console.log(indeces.filter((elem, index) => index < 100))
 
   /*
    * NOTE/TODO
@@ -83,13 +81,36 @@ const parseRules = (plainDataObject) => {
    * However, adding this would be grossly out of the scope of the project
    * at the time of writing. Still, take into account earlier NOTE/TODO.
    */
+
+  /*
+   * NOTE Table of contents end detection is based on strictly increasing numbering, which means
+   * user error in plain text document numbering will likely break front end navigation.
+   */
   // Find end of table of contents/beginning of contents proper
-  // TODO
+  ruleNumberCompare = (a, b) => {
+    const aDigits   = a.replace(/[^0-9.]/g, '')
+    const bDigits   = b.replace(/[^0-9.]/g, '')
+    const delta = parseFloat(aDigits) - parseFloat(bDigits)
+    if (delta !== 0) {
+      return delta
+    }
+    else {
+      const aLetters  = a.replace(/[0-9.]/g,  '')
+      const bLetters  = b.replace(/[0-9.]/g,  '')
+      return aLetters.localeCompare(bLetters)
+    }
+  }
+
+  const indexesSorted = [ ...numberingIndexes ]
+  indexesSorted.sort((a, b) => ruleNumberCompare(a.ruleNumber, b.ruleNumber))
+
+  // TODO Find contentBeginIndex
 
   // Pair table of content indeces to content indeces for later reference
   // TODO
 
-  return rulesSplit // TODO debug placeholder
+  // return rulesSplit // TODO debug placeholder
+  return indexesSorted
 }
 
 module.exports = {
