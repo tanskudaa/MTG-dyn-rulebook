@@ -1,10 +1,17 @@
+//
+// TODO Refactor into util scripts
+//
+
 // require
 const express = require('express')
 const rfs = require('rotating-file-stream')
 const morgan = require('morgan')
 const path = require('path')
-const axios = require('axios')
+const contentHelper = require('./utils/content_helper')
 require('dotenv').config()
+
+// Constants
+const DEFAULT_CONTENT_URL = process.env.DEFAULT_CONTENT_URL || 'https://loripsum.net/api/20'
 
 // Set up express
 const app = express()
@@ -26,7 +33,14 @@ app.use(express.static(path.join(__dirname, '..', 'build')))
 
 app.get('/api/read/:url(*)', (req, res) => {
   const url = req.params.url
-  fetchPlainText(url)
+  // These will now break since I'm implementing proper parsing in utils/content_helper
+  contentHelper.fetchPlainText(url)
+    .then(ret => res.send(ret))
+})
+
+app.get('/api/read', (req, res) => {
+  // These will now break since I'm implementing proper parsing in utils/content_helper
+  contentHelper.fetchPlainText(DEFAULT_CONTENT_URL)
     .then(ret => res.send(ret))
 })
 
@@ -34,37 +48,11 @@ app.get('/*', (req, res) => {
   res.sendFile('index.html', {root: path.join(__dirname, '..', 'build')});
 })
 
-/*
- * Functions
- */
-const fetchPlainText = async (url) => {
-  const MAX_RESPONSE_SIZE = 1000000
-  const defaultUrl = 'https://media.wizards.com/2021/downloads/MagicCompRules%2020210419.txt'
-
-  try {
-    const res = await axios({
-      url: url, // TODO breaks without http:// prefix
-      method: 'GET',
-      maxContentLength: MAX_RESPONSE_SIZE,
-      headers: {
-        'Accept': 'text/plain',
-      }
-    })
-
-    // TODO error handling
-
-    return {data: res.data}
-  }
-  catch (e) {
-    return {error: e.message}
-  }
-}
-
 
 /*
  * Listen for connections
  */
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
