@@ -38,6 +38,15 @@ const fetchPlainText = async (url) => {
 
 // Parse and return the rules as formatted JSON
 const parseRules = (plainDataObject) => {
+
+  /*
+   *
+   * TODO You NEED to refactor this whole mess. Good code but this function takes care of way
+   * too many things. Separate clear single-purpose functions and construct a
+   * fetchFormattedDocument(url) or so for index.js to call.
+   * 
+   */
+
   // Return error on invalid data or exception
   // TODO Re-evaluate error check necessity (move earlier?)
   if (plainDataObject.data === null ||
@@ -102,6 +111,13 @@ const parseRules = (plainDataObject) => {
     ? firstNumbering.index
     : firstNumberingRepeatedAt
 
+  // Last line of introduction (different from first content line IF table of contents present)
+  const introductionLastIndex = (contentFirstIndex === firstNumberingRepeatedAt)
+    ? firstNumbering.index - 2  // Has table of contents
+                                // NOTE/TODO An extra line is stripped for presumed "Contents" header line, which COULD
+                                // strip important introduction information (but doesn't for the Magic text file).
+    : contentFirstIndex - 1     // No table of contents
+
   /*
    * NOTE Last line of numbered rules is detected by assuming strictly increasing numbering.
    * This means user error in writing the fetched plaintext rule file can cause sections of
@@ -116,10 +132,79 @@ const parseRules = (plainDataObject) => {
     ))
     .map(elem => elem.index)
 
-  // Pair table of content indeces to content indeces for later reference
-  // TODO
+  // The numbered rules content, stripped of everything else
+  // const rules = plainTextSplit
+  //   .filter((elem, index) =>
+  //     (contentFirstIndex <= index && index <= contentLastIndex)
+  //   )
 
-  return plainTextSplit.filter((elem, index) => (contentFirstIndex <= index && index <= contentLastIndex))
+  /*
+   * Formatting for front end
+   */
+
+  /*
+   * NOTE Now THIS bit is super interesting to me.
+   *
+   * The backend has a 1MB file size limit set, so I don't need to worry about sending everything
+   * over to React as single JS object. However, anything larger than this, particularly orders of
+   * magnitude larger, start benefitting or even demand dynamically sending only the information
+   * the user is currently viewing.
+   * 
+   * That's out of the scope of this project at it's current state, but I'd love to look further
+   * into this on an unrelated future project. This app simply formats everything into one
+   * multi-thousand line JSON and sends it for the frontend to display as it sees fit. I can't
+   * justify spending much more time on further optimizing this assignment, and I have a hard
+   * time believing browser side performance gains would be even noticeable on modern hardware.
+   * A quick Google search predicts load times around the 10 second mark, and RAM usage of ~50MB.
+   */
+
+  var result = {
+    preamble: [],
+    // table:    {},
+    content:  {}
+  }
+
+  // Preamble
+  if (introductionLastIndex > -1) {
+    for (var i = 0; i <= introductionLastIndex; i++) {
+      result.preamble.push(plainTextSplit[i])
+    }
+  }
+
+  // Content
+  /*
+   * Whether or not the original plaintext file has a table of contents present, a new one
+   * is dynamically created from actual contents to drop dependence on one being submitted.
+   */
+  const allRuleNumbers = numberingIndexes.map(elem => elem.ruleNumber)
+  var lastRuleNumber = ''
+  for (var i = contentFirstIndex; i <= contentLastIndex; i++) {
+    const [ firstWord, ...lineSplit ] = plainTextSplit[i].split(' ')
+    const ruleNumber = (firstWord.charAt(firstWord.length - 1) === '.')
+      ? firstWord.substring(0, firstWord.length - 1)
+      : firstWord
+
+    const line = lineSplit.join(' ') // TODO room for optimization
+
+    // const key = (allRuleNumbers.includes(ruleNumber))
+    //   ? ruleNumber
+    //   : lastKey
+
+    // result.content[key].push(line)
+
+    if (!Object.keys(result.content).includes(ruleNumber)) {
+      result.content[ruleNumber] = []
+      result.content[ruleNumber].push(line)
+      lastRuleNumber = ruleNumber
+    }
+    else {
+      result.content[lastRuleNumber].push(plainTextSplit[i])
+    }
+  }
+
+  // return numberingIndexes // TODO debug
+  // return plainTextSplit // TODO debug
+  return result
 }
 
 module.exports = {
