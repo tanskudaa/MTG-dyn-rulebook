@@ -71,46 +71,55 @@ const parseRules = (plainDataObject) => {
     .map(indexingFunction)
     .filter(elem => typeof elem !== 'undefined')
 
-  /*
-   * NOTE/TODO
-   * It would be fairly trivial to add table of contents detection and dynamic table of contents
-   * generation for files that lack one, which would add support for text files without table of
-   * contents. In it's current state, lacking a table of contents breaks user-end navigation and
-   * renders the whole app useless for these special case files.
-   * 
-   * However, adding this would be grossly out of the scope of the project
-   * at the time of writing. Still, take into account earlier NOTE/TODO.
-   */
-
-  /*
-   * NOTE Table of contents end detection is based on strictly increasing numbering, which means
-   * user error in plain text document numbering will likely break front end navigation.
-   */
-  // Find end of table of contents/beginning of contents proper
+  // Detect if table of contents present, find beginning and end of numbered rules
   ruleNumberCompare = (a, b) => {
-    const aDigits   = a.replace(/[^0-9.]/g, '')
-    const bDigits   = b.replace(/[^0-9.]/g, '')
-    const delta = parseFloat(aDigits) - parseFloat(bDigits)
-    if (delta !== 0) {
-      return delta
+    // TODO comment
+    const aNumbers  = a.substring(0, 1) + '.' + a.substring(1, a.length - 1)
+      .replace(/[^0-9.]/g, '')
+      .split('.')
+    const bNumbers  = b.substring(0, 1) + '.' + a.substring(1, b.length - 1)
+      .replace(/[^0-9.]/g, '')
+      .split('.')
+
+    const significantDigits = Math.min(aNumbers.length, bNumbers.length)
+    for (var i = 0; i < significantDigits; i++) {
+      const delta = aNumbers[i] - bNumbers[i]
+      if (delta !== 0) {
+        return delta
+      }
     }
-    else {
-      const aLetters  = a.replace(/[0-9.]/g,  '')
-      const bLetters  = b.replace(/[0-9.]/g,  '')
-      return aLetters.localeCompare(bLetters)
-    }
+
+    const aLetters  = a.replace(/[0-9.]/g,  '')
+    const bLetters  = b.replace(/[0-9.]/g,  '')
+    return aLetters.localeCompare(bLetters)
   }
 
-  const indexesSorted = [ ...numberingIndexes ]
-  indexesSorted.sort((a, b) => ruleNumberCompare(a.ruleNumber, b.ruleNumber))
+  // First content line
+  const { 0: firstNumbering } = numberingIndexes
+  const firstNumberingRepeatedAt = plainTextSplit
+    .indexOf(plainTextSplit[firstNumbering.index], firstNumbering.index + 1)
+  const contentFirstIndex = (firstNumberingRepeatedAt === -1)
+    ? firstNumbering.index
+    : firstNumberingRepeatedAt
 
-  // TODO Find contentBeginIndex
+  /*
+   * NOTE Last line of numbered rules is detected by assuming strictly increasing numbering.
+   * This means user error in writing the fetched plaintext rule file can cause sections of
+   * text to be completely ignored.
+   */
+  // Last content line
+  const { 0: contentLastIndex } = numberingIndexes
+    .filter((elem, index) => (
+      index <= numberingIndexes.length - 2      &&
+      index >= contentFirstIndex                &&
+      ruleNumberCompare(elem.ruleNumber, numberingIndexes[index + 1].ruleNumber) > 0
+    ))
+    .map(elem => elem.index)
 
   // Pair table of content indeces to content indeces for later reference
   // TODO
 
-  // return rulesSplit // TODO debug placeholder
-  return indexesSorted
+  return plainTextSplit.filter((elem, index) => (contentFirstIndex <= index && index <= contentLastIndex))
 }
 
 module.exports = {
