@@ -1,17 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import axios from 'axios'
 
 const Rules = ({ rules }) => {
-  return (
-    <p>{`${rules}`}</p>
-  )
+  if (!rules.content) {
+    return null
+  }
+  else {
+    // Object.entries(rules.content)
+    //   .filter((elem, index) => index < 10)
+    //   .forEach(([key, value]) => console.log(key, value))
+
+    return (
+      Object.entries(rules.content)
+        .map(([ruleNumber, lines]) => {
+          // TODO React child unique key warning
+          return <p>{ruleNumber} {lines}</p>
+      })
+    )
+  }
 }
 
 const App = () => {
-  const [ rules, setRules ] = useState('')
+  // TODO use models or whatever they were called
+  const [ rules, setRules ] = useState({})
 
   useEffect(() => {
-    setRules('bläb')
+    // TODO use models or whatever they were called
+    axios.get('/api/read')
+      .then(res => {
+        console.log(res)
+        setRules(res.data)
+      })
   }, [])
 
   return (
@@ -21,12 +41,13 @@ const App = () => {
       </div> */}
 
       <Switch>
-        <Route exact path='/'>
-          <p>Home</p>
+        <Route exact path={['/', '/read']}>
+          <Rules 
+            rules={rules}
+            // rulesSetter={setRules}
+          />
+
         </Route>
-        {/* <Route path="/sec">
-          <Rules rules={rules} />
-        </Route> */}
         <Route path="/*">
           <p>404</p>
         </Route>

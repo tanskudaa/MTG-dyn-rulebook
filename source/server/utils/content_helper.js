@@ -65,11 +65,10 @@ const parseRules = (plainDataObject) => {
 
   // Map onto array of rule numbers with indeces
   const indexingFunction = (elem, index) => {
-    const temp = elem // TODO rename temp variable
-      .split(' ')[0]
-    const firstWord = (temp.charAt(temp.length - 1) === '.')
-      ? temp.substring(0, temp.length - 1)
-      : temp
+    const lineSplit = elem.split(' ')[0]
+    const firstWord = (lineSplit.charAt(lineSplit.length - 1) === '.')
+      ? lineSplit.substring(0, lineSplit.length - 1)
+      : lineSplit
     const firstDigits = firstWord
       .split('.')[0]
 
@@ -104,7 +103,7 @@ const parseRules = (plainDataObject) => {
   }
 
   // First content line
-  const { 0: firstNumbering } = numberingIndexes
+  const firstNumbering = numberingIndexes[0] || { index: -1 }
   const firstNumberingRepeatedAt = plainTextSplit
     .indexOf(plainTextSplit[firstNumbering.index], firstNumbering.index + 1)
   const contentFirstIndex = (firstNumberingRepeatedAt === -1)
@@ -132,12 +131,6 @@ const parseRules = (plainDataObject) => {
     ))
     .map(elem => elem.index)
 
-  // The numbered rules content, stripped of everything else
-  // const rules = plainTextSplit
-  //   .filter((elem, index) =>
-  //     (contentFirstIndex <= index && index <= contentLastIndex)
-  //   )
-
   /*
    * Formatting for front end
    */
@@ -160,7 +153,6 @@ const parseRules = (plainDataObject) => {
 
   var result = {
     preamble: [],
-    // table:    {},
     content:  {}
   }
 
@@ -179,18 +171,13 @@ const parseRules = (plainDataObject) => {
   const allRuleNumbers = numberingIndexes.map(elem => elem.ruleNumber)
   var lastRuleNumber = ''
   for (var i = contentFirstIndex; i <= contentLastIndex; i++) {
+    // TODO indexingFunction does practically the exact same thing as the following 4 lines, refactor
     const [ firstWord, ...lineSplit ] = plainTextSplit[i].split(' ')
     const ruleNumber = (firstWord.charAt(firstWord.length - 1) === '.')
       ? firstWord.substring(0, firstWord.length - 1)
       : firstWord
 
     const line = lineSplit.join(' ') // TODO room for optimization
-
-    // const key = (allRuleNumbers.includes(ruleNumber))
-    //   ? ruleNumber
-    //   : lastKey
-
-    // result.content[key].push(line)
 
     if (!Object.keys(result.content).includes(ruleNumber)) {
       result.content[ruleNumber] = []
@@ -202,8 +189,6 @@ const parseRules = (plainDataObject) => {
     }
   }
 
-  // return numberingIndexes // TODO debug
-  // return plainTextSplit // TODO debug
   return result
 }
 

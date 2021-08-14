@@ -8,7 +8,6 @@ const rfs = require('rotating-file-stream')
 const morgan = require('morgan')
 const path = require('path')
 const contentHelper = require('./utils/content_helper')
-const { nextTick } = require('process')
 require('dotenv').config()
 
 // Constants
@@ -32,22 +31,16 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
  */
 app.use(express.static(path.join(__dirname, '..', 'build')))
 
-app.get('/api/read/:url(*)', (req, res) => {
-  const url = (req.params.url !== '')
+app.get(['/api/read', '/api/read/:url(*)'], (req, res) => {
+  const url = (typeof req.params.url !== 'undefined' && req.params.url !== '')
     ? req.params.url
     : DEFAULT_CONTENT_URL
 
-    // NOTE/TODO This will now break since I'm implementing proper parsing in utils/content_helper
     contentHelper.fetchPlainText(url)
       .then(ret => res.send(ret))
   }
 )
 
-// app.get('/api/read', (req, res) => {
-//   // These will now break since I'm implementing proper parsing in utils/content_helper
-//   contentHelper.fetchPlainText(DEFAULT_CONTENT_URL)
-//     .then(ret => res.send(ret))
-// })
 
 app.get('/*', (req, res) => {
   res.sendFile('index.html', {root: path.join(__dirname, '..', 'build')});
