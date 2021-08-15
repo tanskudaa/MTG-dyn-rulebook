@@ -13,7 +13,7 @@ node_modules/
 /source/coverage
 
 # production
-/source/build
+build
 
 # logs
 log/

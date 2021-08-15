@@ -14,8 +14,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start-client": "react-scripts start",
-    "build": "react-scripts build",
+    "start-client": "cross-env BROWSER=none react-scripts start",
+    "build": "cross-env react-scripts build && powershell.exe Copy-Item -Path ./build -Destination ./server/build -Recurse",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -38,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "http-proxy-middleware": "^2.0.1"
   }
 }

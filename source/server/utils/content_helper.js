@@ -2,11 +2,15 @@
 const axios = require('axios')
 
 /*
+ * TODO Check eqeqeq's
+ */
+
+/*
  * Functions
  */
 // Fetch and parse plaintext files, return formatted JSON
 const fetchPlainText = async (url) => {
-  // TODO process.env
+  // TODO environment variablize
   const MAX_RESPONSE_SIZE = 1000000 // bytes
 
   try {
@@ -77,7 +81,7 @@ const parseRules = (plainDataObject) => {
 
   const numberingIndexes = plainTextSplit
     .map(indexingFunction)
-    .filter(elem => typeof elem !== 'undefined')
+    .filter(elem => (typeof elem !== 'undefined' && elem.ruleNumber.length > 0))
 
   // Detect if table of contents present, find beginning and end of numbered rules
   ruleNumberCompare = (a, b) => {
@@ -171,15 +175,18 @@ const parseRules = (plainDataObject) => {
   const allRuleNumbers = numberingIndexes.map(elem => elem.ruleNumber)
   var lastRuleNumber = ''
   for (var i = contentFirstIndex; i <= contentLastIndex; i++) {
-    // TODO indexingFunction does practically the exact same thing as the following 4 lines, refactor
-    const [ firstWord, ...lineSplit ] = plainTextSplit[i].split(' ')
-    const ruleNumber = (firstWord.charAt(firstWord.length - 1) === '.')
-      ? firstWord.substring(0, firstWord.length - 1)
-      : firstWord
-
+    const [ rest, ...lineSplit ] = plainTextSplit[i].split(' ')
     const line = lineSplit.join(' ') // TODO room for optimization
 
-    if (!Object.keys(result.content).includes(ruleNumber)) {
+    const { 0: ruleNumber } = numberingIndexes
+      .filter(elem => elem.index === i)
+      .map(elem => elem.ruleNumber)
+
+    if (
+        // typeof ruleNumber !== 'undefined'                 && // TODO check necessity
+        allRuleNumbers.includes(ruleNumber)               &&
+        !Object.keys(result.content).includes(ruleNumber)
+    ) {
       result.content[ruleNumber] = []
       result.content[ruleNumber].push(line)
       lastRuleNumber = ruleNumber

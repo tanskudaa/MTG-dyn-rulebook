@@ -29,7 +29,8 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 /*
  * Send frontend build on request
  */
-app.use(express.static(path.join(__dirname, '..', 'build')))
+// app.use(express.static(path.join(__dirname, '..', 'build')))
+app.use(express.static(path.join(__dirname, 'build')))
 
 app.get(['/api/read', '/api/read/:url(*)'], (req, res) => {
   const url = (typeof req.params.url !== 'undefined' && req.params.url !== '')

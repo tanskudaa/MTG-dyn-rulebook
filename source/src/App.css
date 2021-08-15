@@ -1,0 +1,106 @@
+html, body {
+  margin: 0 0;
+  height: 100%;
+}
+
+.block-container {
+  position: absolute;
+  margin: 0 1em 2em;
+  padding-bottom: 18em;
+  top: 5em;
+  max-width: 55em;
+  min-width: 40%;
+  transition: opacity 450ms;
+}
+
+.block-container__content {
+  border: 5px outset black;
+  background-color: white;
+  padding: 2em 3em;
+}
+
+footer {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  margin: 1em 0;
+  text-align: center;
+}
+
+.footer__content {
+  padding: 0 2em;
+  margin: 0 4em;
+  min-width: 450px;
+  border-radius: 35px;
+  background-color: #ffc68c;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.fade-in {
+  /* animation-name: anim-fade-in;
+  animation-duration: 450ms;
+  animation-fill-mode: both;
+  animation-play-state: paused; */
+  opacity: 0;
+}
+
+.fade-in--activated {
+  opacity: 1;
+}
+
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4 {
+  /* font-family: 'Crimson Text', serif; */
+  font-weight: normal;
+}
+
+h1, .h1 { font-size: 3em; }
+h2, .h2 { font-size: 2em; }
+h3, .h3 { font-size: 1.5em; }
+h4, .h4 { font-size: 1.25em; }
+
+p, .p {
+  /* font-family: 'Montserrat', sans-serif; */
+  /* font-size: 1em; */
+}
+
+.content__section .h2,
+.content__section h2 {
+  margin-bottom: 1rem;
+}
+/* The first .h3 after title in rulepage*/
+.content__section h2 + ul > .h3 {
+  margin-top: 1rem;
+}
+.content__section .h3 {
+  margin-top: 8rem;
+  margin-bottom: 1em;
+}
+.content__section .p {
+  margin-bottom: 3rem;
+}
+
+ul {
+  padding-left: 1rem;
+}
+li {
+  list-style-type: none;
+}
+
+.italic {
+  font-style: italic;
+}
+.bold {
+  font-weight: bold;
+}
+.right-align {
+  text-align: right;
+}
